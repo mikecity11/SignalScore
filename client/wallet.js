@@ -1,4 +1,6 @@
 import {getWallets} from '@wallet-standard/app';
+const registry=getWallets();
+for(const event of ['register','unregister'])registry.on(event,()=>window.dispatchEvent(new Event('signalscore:wallets-changed')));
 window.signalWallet={
  list(){return getWallets().get().filter(w=>w.features['standard:connect']&&w.features['sui:signPersonalMessage']).map(w=>({name:w.name}));},
  async signIn(name){
