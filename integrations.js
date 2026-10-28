@@ -34,7 +34,7 @@ async function syncEntry(index,button){
 const renderCore=render;
 render=function(){
  renderCore();
- const top=document.querySelector('.topright');if(top){const b=document.createElement('a');b.className='button secondary';b.href='#integrations';b.textContent=connection.wallet?shortWallet(connection.wallet):'Connect wallet';top.prepend(b);}
+ const top=document.querySelector('.topright');if(top){const b=document.createElement('a');b.className='button secondary';b.href='#integrations';b.textContent=connection.wallet?shortWallet(connection.wallet):'Connect wallet';b.onclick=e=>{e.preventDefault();if(page()!=='integrations'){location.hash='integrations';render();}const options=document.getElementById('wallet-options');const choices=options?.querySelectorAll('[data-wallet]');if(!connection.wallet&&choices?.length===1){choices[0].click();}else{const target=options||document.getElementById('logout-wallet');target?.scrollIntoView({behavior:'smooth',block:'center'});if(choices?.length)choices[0].focus();else if(!connection.wallet)toast(connection.authConfigured?'No compatible Sui wallet detected. Open your wallet extension and refresh.':'Wallet sign-in is awaiting server configuration.');}};top.prepend(b);}
  if(page()==='journal'){
   document.querySelectorAll('.prediction-card').forEach(card=>{
    const index=Number(card.querySelector('[data-delete]').dataset.delete);const e=entries[index];
