@@ -1,44 +1,57 @@
 # SignalScore
 
-A personal prediction journal and Polymarket companion. Explore real questions, record your view and reasoning, and retain the market context behind each decision.
+A personal prediction journal and Polymarket companion for the Tatum x Walrus Total Recall hackathon.
 
-## Working in this version
+## Features and current verification
 
-- Six responsive workspace views: overview, live markets, journal, analyst watchlist, memory timeline and methodology.
-- A read-only Vercel function (`api/markets.js`) fetches public Polymarket Gamma market data. No Polymarket API key is required.
-- Browse markets by recent volume, inspect resolution rules and outcome price snapshots, filter loaded markets, refresh and load more.
-- Save a selected market with its ID, outcome, optional confidence, reasoning, rules and source snapshot timestamp.
-- Save personal predictions and analyst names locally, revisit notes, export a JSON backup and delete entries after confirmation.
-- Existing browser journal entries remain supported.
+- Live Polymarket discovery, rules and price snapshots; linked prediction journaling with reasoning, JSON export and local deletion. Browser-tested.
+- Outcome checking against final payout data or explicit legacy winner flags. Pending, refunded and unconfirmed markets are not assigned a correct/incorrect verdict. Public-source smoke-tested.
+- Sui wallet personal-message sign-in, signed server sessions, wallet-derived memory namespaces and CSRF checks. Signature and isolation tests pass; the user's real extension sign-in still needs testing.
+- Walrus Memory mainnet write, job confirmation, semantic recall and copying recalled predictions back to the local journal. **Adapter implemented; real credential and mainnet write verification pending.**
+- Tatum native Sui gRPC read of the configured Walrus account object. **Adapter implemented; API key and live verification pending.**
+- Analyst watchlist is local only. Automated analyst claim collection, AI coaching, background outcome schedules and independent prediction timestamp proofs are not implemented.
 
-## Not connected yet
+## Owner setup
 
-- Walrus Memory mainnet writes and semantic recall.
-- Tatum blockchain data.
-- Automatic outcome checks, scoring and analyst claim ingestion.
-- User accounts or cross-device persistence.
+1. At https://memory.walrus.xyz, connect a Sui wallet, create a mainnet Memory account and an app-specific delegate key. Keep the owner wallet key offline.
+2. Add `MEMWAL_ACCOUNT_ID` (account object ID) and `MEMWAL_PRIVATE_KEY` (delegate key, never the owner key) as server-side production secrets in Vercel.
+3. Create a Tatum API key at https://dashboard.tatum.io with Sui mainnet gRPC access. Add the production secret `TATUM_API_KEY`.
+4. Set a random `SESSION_SECRET` of at least 32 characters. This deployment's signing secret has already been provisioned; do not replace it merely to add the other settings.
+5. Redeploy. In Connections, connect a compatible Sui wallet and sign the login message. Test authenticated Walrus recall and the Tatum Sui account read.
+6. Save a prediction, choose **Save to Walrus**, then **Check Walrus write**. Acceptance is not completion: confirm `done` plus a mainnet blob ID. Store at least 10 distinct meaningful memories for submission; retries reuse operation keys.
+7. Search Memory by meaning. Copy individual matches into the local journal when needed. Recall is not a complete journal export.
 
-Journal entries are stored in localStorage on the current origin and browser. They are not independently timestamped proofs, cannot be transferred between the Sites and Vercel origins automatically, and are not sent to Walrus. Export a backup before clearing browser data. Market prices are retrieved snapshots, not guaranteed execution prices or verified outcomes. Closed does not mean resolved.
+## Trust and privacy
 
-## Run locally
+The project owns the Walrus account, following the documented operator-account pattern. Verified wallet addresses select namespaces; the operator's delegate can access all of them. Signing in does not transfer ownership to users. The server verifies personal-message signatures, binds challenges to host and expiry and uses Secure, HttpOnly, SameSite=Strict session cookies. API requests cannot choose another user's namespace. Keys remain server-side.
 
-Requires Node.js 20 or newer.
+Saved prediction content passes through this app server and Walrus's managed relayer, which handles embeddings and Seal encryption. It is not end-to-end encrypted against the operator. Uploads require the user's Save to Walrus action. Local deletion removes only the browser copy, not remote Walrus data. Sign-out clears the session but leaves local notes on that device.
+
+Local notes use the current browser origin's localStorage; the Sites and Vercel origins do not automatically share them. Export a backup before clearing browser data. User-entered dates and notes are not independent proof that a forecast preceded resolution.
+
+## Data and evidence
+
+`api/markets.js`: bounded GET requests to a fixed Gamma upstream, normalization, timeout and explicit errors. No example data replaces unavailable live data.
+
+`api/resolution.js`: requires a terminal resolution with payout data; falls back to explicit CLOB winner flags. Prices or `closed` alone do not identify a winner. No trade or payment is executed.
+
+`api/memory.js`: signed sessions, wallet-derived namespaces, bounded records, deterministic operation keys and status checks. A blob receipt appears only after a confirmed job from the same namespace. Search results are rendered as untrusted text.
+
+`api/tatum.js`: reads the configured account object through Tatum's Sui mainnet gRPC gateway with a server-side API key. This confirms account existence, not individual memory storage. Write receipts are separate.
+
+## Development and deployment
+
+Node.js 20 or newer:
 
 ```sh
+npm ci
 npm test
+npm run build
 npx vercel dev
 ```
 
-Serve through Vercel development mode to support `/api/markets`; opening index.html directly will not run the server function. No build command is needed. Deploy the repository root with framework preset Other.
+The build bundles the wallet-standard browser adapter to `assets/wallet.js`. Use Vercel framework **Other**, repository root, build command `npm run build`, output directory `.`. `/api` functions require Vercel development mode or deployment; opening HTML directly cannot run them. Use `.env.example` as a list of server settings, never commit real keys.
 
-## Data flow
+Tests cover signature verification, token tampering/expiry, cross-site rejection, namespace isolation, stable write operations, market normalization, pagination, payout handling and explicit winner flags. Tests using substitutes are not evidence of live Walrus or Tatum connectivity.
 
-Browser → GET /api/markets → Polymarket Gamma → normalized market snapshot → local prediction journal.
-
-The gateway accepts only GET, validates a bounded pagination offset, uses a fixed upstream host, enforces a timeout and returns an explicit error when the source is unavailable. It never substitutes demo data for a failed live request. Feed responses can be cached for 30 seconds, with stale responses served during revalidation for up to 60 seconds.
-
-## Verification
-
-`npm test` covers upstream normalization, invalid prices, request validation, pagination and upstream failures. These checks do not verify Walrus, Tatum, user authentication or automatic market scoring.
-
-Independent project for the Tatum x Walrus Total Recall hackathon. Not affiliated with Polymarket, Tatum or Walrus.
+Independent project; not affiliated with Polymarket, Tatum or Walrus. Market prices are snapshots and not guaranteed execution prices.
