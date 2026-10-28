@@ -2,7 +2,7 @@
 const pages = [['overview','◫','Overview'],['markets','◉','Explore markets'],['journal','▤','My predictions'],['analysts','♧','Analyst watchlist'],['memory','✳','Memory'],['methodology','◇','How it works']];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date = s => s && !isNaN(new Date(s)) ? new Date(s).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}) : 'Not specified';
-const pct = p => p === null || p === undefined ? '—' : `${Math.round(p * 100)}%`;
+const pct = p => p === null || p === undefined ? '—' : `${(p * 100).toFixed(1)}%`;
 function read(key) { try { const v=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[]; } catch { return []; } }
 let entries=read('signal-entries');
 let analysts=read('signal-analysts');
