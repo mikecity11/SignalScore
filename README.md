@@ -2,14 +2,22 @@
 
 A personal prediction journal and Polymarket companion for the Tatum x Walrus Total Recall hackathon.
 
+Live demo: https://signalscore-wheat.vercel.app
+
 ## Features and current verification
 
 - Live Polymarket discovery, rules and price snapshots; linked prediction journaling with reasoning, JSON export and local deletion. Browser-tested.
 - Outcome checking against final payout data or explicit legacy winner flags. Pending, refunded and unconfirmed markets are not assigned a correct/incorrect verdict. Public-source smoke-tested.
-- Sui wallet personal-message sign-in, signed server sessions, wallet-derived memory namespaces and CSRF checks. Signature and isolation tests pass; the user's real extension sign-in still needs testing.
-- Walrus Memory mainnet write, job confirmation, semantic recall and copying recalled predictions back to the local journal. **Adapter implemented; real credential and mainnet write verification pending.**
-- Tatum native Sui gRPC read of the configured Walrus account object. **Adapter implemented; API key and live verification pending.**
+- Sui wallet personal-message sign-in, signed server sessions, wallet-derived memory namespaces and CSRF checks. Signature and isolation tests pass; real Suiet wallet sign-in was tested successfully on the production site.
+- Walrus Memory mainnet write, job confirmation, semantic recall and copying recalled predictions back to the local journal. Production mainnet write and authenticated semantic recall tested successfully. The journal export dated 9 November 2026 contains 12 completed write receipts with 12 unique blob IDs across 11 markets. These are exported client receipts, not an independent re-query of every blob.
+- Tatum native Sui gRPC read of the configured Walrus account object. Production mainnet read tested successfully on 9 November 2026, returning the configured account object and version.
 - Analyst watchlist is local only. Automated analyst claim collection, AI coaching, background outcome schedules and independent prediction timestamp proofs are not implemented.
+
+## Demo evidence and limitations
+
+The submission dataset includes hypothetical forecasts created to exercise storage and recall. They are demonstration data, not researched recommendations or a proven forecasting track record. Two early entries concern the same market with different reasoning and distinct blob receipts. Authenticated recall also returned a saved entry after sign-out, refresh and reconnection during user testing.
+
+A successful Tatum account read confirms that the configured Sui account object exists; it does not prove individual Walrus writes. Mainnet write receipts and authenticated recall provide separate evidence. No claim is made that an AI agent has learned autonomously from this dataset.
 
 ## Owner setup
 
